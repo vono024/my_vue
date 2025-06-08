@@ -1,6 +1,6 @@
 <template>
   <div>
-    <!-- ХЕДЕР тільки якщо авторизований -->
+
     <nav v-if="user" class="navbar navbar-expand-lg navbar-dark bg-success">
       <div class="container">
         <router-link to="/" class="navbar-brand">🌿 Порадник</router-link>
@@ -18,7 +18,6 @@
       </div>
     </nav>
 
-    <!-- ВІТАННЯ для НЕавторизованого користувача -->
     <div v-if="!user" class="d-flex align-items-center justify-content-center text-center text-white"
          style="height: 100vh; background: linear-gradient(135deg, #1e7d4d, #0c3b2e);">
       <div>
