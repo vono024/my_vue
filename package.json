@@ -1,5 +1,19 @@
 {
+  "name": "plant-care-app",
+  "version": "1.0.0",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "serve": "vite preview"
+  },
   "dependencies": {
-    "firebase": "^11.9.0"
+    "bootstrap": "^5.3.3",
+    "firebase": "^10.12.2",
+    "vue": "^3.4.15",
+    "vue-router": "^4.2.5"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^5.0.4",
+    "vite": "^5.2.0"
   }
 }
