@@ -1,52 +1,65 @@
 <template>
-  <div class="container my-5" style="max-width: 500px">
+  <div class="container my-5" style="max-width: 420px">
     <h2 class="text-center mb-4">Вхід / Реєстрація</h2>
-    <form @submit.prevent="() => {}">
-      <div class="mb-3">
-        <input v-model="email" type="email" class="form-control" placeholder="Email" required />
-      </div>
-      <div class="mb-3">
-        <input v-model="password" type="password" class="form-control" placeholder="Пароль" required />
-      </div>
-      <div class="d-grid gap-2">
-        <button @click="login" type="button" class="btn btn-success">Увійти</button>
-        <button @click="register" type="button" class="btn btn-outline-success">Зареєструватись</button>
-      </div>
-      <div v-if="error" class="alert alert-danger mt-3 text-center">
-        {{ error }}
-      </div>
-    </form>
+
+    <input v-model="email" type="email" class="form-control mb-3" placeholder="Email" required />
+    <input v-model="password" type="password" class="form-control mb-3" placeholder="Пароль" required />
+
+    <button @click="login" class="btn btn-success w-100 mb-2">Увійти</button>
+    <button @click="register" class="btn btn-outline-success w-100">Зареєструватись</button>
+
+    <div v-if="errorMessage" class="alert alert-danger mt-3 text-center">
+      {{ errorMessage }}
+    </div>
   </div>
 </template>
 
 <script setup>
 import { ref } from 'vue'
-import { useRouter } from 'vue-router'
 import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth'
+import { useRouter } from 'vue-router'
 
 const email = ref('')
 const password = ref('')
-const error = ref('')
+const errorMessage = ref('')
 const router = useRouter()
 const auth = getAuth()
 
+const translateFirebaseError = (error) => {
+  switch (error.code) {
+    case 'auth/email-already-in-use':
+      return 'Цей email вже зареєстрований'
+    case 'auth/invalid-email':
+      return 'Некоректний формат email'
+    case 'auth/weak-password':
+      return 'Пароль має містити щонайменше 6 символів'
+    case 'auth/user-not-found':
+    case 'auth/wrong-password':
+      return 'Невірний email або пароль'
+    case 'auth/network-request-failed':
+      return 'Помилка мережі. Перевірте підключення до інтернету'
+    default:
+      return 'Помилка: ' + error.message
+  }
+}
+
 const login = async () => {
-  error.value = ''
+  errorMessage.value = ''
   try {
-    await signInWithEmailAndPassword(auth, email.value, password.value)
+    await signInWithEmailAndPassword(auth, email.value.trim(), password.value)
     router.push('/')
-  } catch (e) {
-    error.value = 'Невірний email або пароль'
+  } catch (error) {
+    errorMessage.value = translateFirebaseError(error)
   }
 }
 
 const register = async () => {
-  error.value = ''
+  errorMessage.value = ''
   try {
-    await createUserWithEmailAndPassword(auth, email.value, password.value)
+    await createUserWithEmailAndPassword(auth, email.value.trim(), password.value)
     router.push('/')
-  } catch (e) {
-    error.value = 'Помилка при реєстрації'
+  } catch (error) {
+    errorMessage.value = translateFirebaseError(error)
   }
 }
 </script>
