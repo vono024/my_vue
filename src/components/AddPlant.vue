@@ -5,26 +5,36 @@
       <form @submit.prevent="addPlant" class="row g-3">
         <div class="col-md-6">
           <label class="form-label">Назва рослини</label>
-          <input v-model="plant.name" type="text" class="form-control" placeholder="Наприклад: Фікус" required />
+          <input v-model="plant.name" type="text" class="form-control" required />
         </div>
         <div class="col-md-6">
           <label class="form-label">Полив</label>
-          <input v-model="plant.watering" type="text" class="form-control" placeholder="1 раз на тиждень" required />
+          <input v-model="plant.watering" type="text" class="form-control" required />
         </div>
         <div class="col-md-6">
           <label class="form-label">Освітлення</label>
-          <input v-model="plant.light" type="text" class="form-control" placeholder="Розсіяне світло" required />
+          <input v-model="plant.light" type="text" class="form-control" required />
         </div>
         <div class="col-md-6">
           <label class="form-label">Температура</label>
-          <input v-model="plant.temperature" type="text" class="form-control" placeholder="18–25°C" />
+          <input v-model="plant.temperature" type="text" class="form-control" />
         </div>
         <div class="col-12">
           <label class="form-label">Примітки</label>
-          <textarea v-model="plant.notes" class="form-control" rows="3" placeholder="Додаткові поради"></textarea>
+          <textarea v-model="plant.notes" class="form-control" rows="3"></textarea>
         </div>
+
         <div class="col-12">
-          <button type="submit" class="btn btn-success w-100 py-2">➕ Додати пораду</button>
+          <label class="form-label">Зображення (необов’язково)</label>
+          <input type="file" accept="image/*" class="form-control" @change="handleImage" />
+        </div>
+
+        <div class="col-12 text-center" v-if="preview">
+          <img :src="preview" alt="Прев’ю" class="img-fluid rounded mt-3" style="max-height: 300px;" />
+        </div>
+
+        <div class="col-12">
+          <button type="submit" class="btn btn-success w-100 py-2 mt-3">➕ Додати пораду</button>
         </div>
       </form>
     </div>
@@ -49,13 +59,15 @@ import { addDoc, collection } from 'firebase/firestore'
 
 const user = ref(null)
 const isAdded = ref(false)
+const preview = ref(null)
 
 const plant = ref({
   name: '',
   watering: '',
   light: '',
   temperature: '',
-  notes: ''
+  notes: '',
+  image: null
 })
 
 onMounted(() => {
@@ -65,23 +77,35 @@ onMounted(() => {
   })
 })
 
-const addPlant = async () => {
-  if (!user.value) return
+const handleImage = (e) => {
+  const file = e.target.files[0]
+  if (!file) return
 
+  const reader = new FileReader()
+  reader.onload = () => {
+    preview.value = reader.result
+    plant.value.image = reader.result // base64
+  }
+  reader.readAsDataURL(file)
+}
+
+const addPlant = async () => {
   const colRef = collection(db, 'plants')
   await addDoc(colRef, {
     ...plant.value,
     userId: user.value.uid
   })
 
+  // Скинути форму
   plant.value = {
     name: '',
     watering: '',
     light: '',
     temperature: '',
-    notes: ''
+    notes: '',
+    image: null
   }
-
+  preview.value = null
   isAdded.value = true
 }
 </script>
